@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <title>Video Game Sales</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+
+<body>
+<svg>
+    <g id="chart"></g>
+</svg>
+</body>
+
+<script>
+
+    var data = d3.csv("filteredSubset.csv")
+        .then(filterData)
+    //.then(drawCircles)
+
+    var width = 800,
+        height = 800;
+
+    var svg = d3.select("#chart")
+        .append("svg")
+        .append("g")
+
+    // add cluster labels
+    svg.append("text").attr("x", 500).attr("y", 65).text("Activision").style("font-size", "30px").attr("alignment-baseline","middle").attr("fill", "white")
+    svg.append("text").attr("x", 200).attr("y", 580).text("Ubisoft").style("font-size", "30px").attr("alignment-baseline","middle").attr("fill", "white")
+    svg.append("text").attr("x", 760).attr("y", 460).text("Electronic Arts").style("font-size", "30px").attr("alignment-baseline","middle").attr("fill", "white")
+    svg.append("text").attr("x", 1280).attr("y", 100).text("Nintendo").style("font-size", "30px").attr("alignment-baseline","middle").attr("fill", "white")
+    svg.append("text").attr("x", 1675).attr("y", 590).text("Bethesda").style("font-size", "30px").attr("alignment-baseline","middle").attr("fill", "white")
+
+
+    svg.append("circle").attr("cx",200).attr("cy",130).attr("r", 6).style("fill", "#FBA4FF")
+    svg.append("circle").attr("cx",200).attr("cy",160).attr("r", 6).style("fill", "#8CD9FF")
+    svg.append("circle").attr("cx",200).attr("cy",190).attr("r", 6).style("fill", "#ECDA00")
+    svg.append("circle").attr("cx",200).attr("cy",220).attr("r", 6).style("fill", "#FF9900")
+    svg.append("circle").attr("cx",200).attr("cy",250).attr("r", 6).style("fill", "#FF4F4F")
+    svg.append("circle").attr("cx",200).attr("cy",280).attr("r", 6).style("fill", "#4FFF54")
+    svg.append("circle").attr("cx",200).attr("cy",310).attr("r", 6).style("fill", "#AC1AFF")
+    svg.append("circle").attr("cx",200).attr("cy",340).attr("r", 6).style("fill", "#0100FF")
+    svg.append("circle").attr("cx",200).attr("cy",370).attr("r", 6).style("fill", "#FFFFFF")
+    svg.append("circle").attr("cx",200).attr("cy",400).attr("r", 6).style("fill", "#00FFEE")
+    svg.append("circle").attr("cx",200).attr("cy",430).attr("r", 6).style("fill", "#000000")
+    svg.append("circle").attr("cx",200).attr("cy",460).attr("r", 6).style("fill", "#89550B")
+    svg.append("text").attr("x", 220).attr("y", 130).text("Platform").style("font-size", "15px").attr("alignment-baseline","middle").attr("fill", "white")
+    svg.append("text").attr("x", 220).attr("y", 160).text("Racing").style("font-size", "15px").attr("alignment-baseline","middle").attr("fill", "white")
+    svg.append("text").attr("x", 220).attr("y", 190).text("Sports").style("font-size", "15px").attr("alignment-baseline","middle").attr("fill", "white")
+    svg.append("text").attr("x", 220).attr("y", 220).text("Fighting").style("font-size", "15px").attr("alignment-baseline","middle").attr("fill", "white")
+    svg.append("text").attr("x", 220).attr("y", 250).text("Shooter").style("font-size", "15px").attr("alignment-baseline","middle").attr("fill", "white")
+    svg.append("text").attr("x", 220).attr("y", 280).text("Role-Playing").style("font-size", "15px").attr("alignment-baseline","middle").attr("fill", "white")
+    svg.append("text").attr("x", 220).attr("y", 310).text("Strategy").style("font-size", "15px").attr("alignment-baseline","middle").attr("fill", "white")
+    svg.append("text").attr("x", 220).attr("y", 340).text("Action").style("font-size", "15px").attr("alignment-baseline","middle").attr("fill", "white")
+    svg.append("text").attr("x", 220).attr("y", 370).text("Misc").style("font-size", "15px").attr("alignment-baseline","middle").attr("fill", "white")
+    svg.append("text").attr("x", 220).attr("y", 400).text("Simulation").style("font-size", "15px").attr("alignment-baseline","middle").attr("fill", "white")
+    svg.append("text").attr("x", 220).attr("y", 430).text("Puzzle").style("font-size", "15px").attr("alignment-baseline","middle").attr("fill", "white")
+    svg.append("text").attr("x", 220).attr("y", 460).text("Adventure").style("font-size", "15px").attr("alignment-baseline","middle").attr("fill", "white")
+
+    var simulation1 = d3.forceSimulation()
+        .force("xForce", d3.forceX(width - 500).strength(0.05))
+        .force("yForce", d3.forceY((height/2)+380).strength(0.05))
+        .force("collide", d3.forceCollide(function(d) {
+            return radiusScale(d.Global_Sales) + 10;
+        }))
+
+    var simulation2 = d3.forceSimulation()
+        .force("xForce", d3.forceX(width + - 200).strength(0.05))
+        .force("yForce", d3.forceY((height/2)-100).strength(0.05))
+        .force("collide", d3.forceCollide(function(d) {
+            return radiusScale(d.Global_Sales) + 10;
+        }))
+
+    var simulation3 = d3.forceSimulation()
+        .force("xForce", d3.forceX(width + 100).strength(0.05))
+        .force("yForce", d3.forceY((height/2)+300).strength(0.05))
+        .force("collide", d3.forceCollide(function(d) {
+            return radiusScale(d.Global_Sales) + 10;
+        }))
+
+    var simulation4 = d3.forceSimulation()
+        .force("xForce", d3.forceX(width + 600).strength(0.05))
+        .force("yForce", d3.forceY((height/2)+ 50).strength(0.05))
+        .force("collide", d3.forceCollide(function(d) {
+            return radiusScale(d.Global_Sales) + 10;
+        }))
+
+    var simulation5 = d3.forceSimulation()
+        .force("xForce", d3.forceX(width + 1000).strength(0.05))
+        .force("yForce", d3.forceY((height/2)+400).strength(0.05))
+        .force("collide", d3.forceCollide(function(d) {
+            return radiusScale(d.Global_Sales) + 10;
+        }))
+
+    var activision = []
+    var bethesda = []
+    var ea = []
+    var nintendo = []
+    var ubisoft = []
+
+
+    var radiusScale = d3.scaleSqrt([1,83]).range([1,8])
+
+    function filterData(games) {
+        for (i = 0; i < games.length; i++) {
+            if (games[i].Publisher == "Activision") {
+                activision.push(games[i])
+            }
+            else if (games[i].Publisher == "Bethesda Softworks") {
+                bethesda.push(games[i])
+            }
+            else if (games[i].Publisher == "Electronic Arts") {
+                ea.push(games[i])
+            }
+            else if (games[i].Publisher == "Nintendo") {
+                nintendo.push(games[i])
+            }
+            else if (games[i].Publisher == "Ubisoft") {
+                ubisoft.push(games[i])
+            }
+
+        }
+
+        drawCircles(games)
+
+    }
+
+    //function drawCircle(games) {
+    function drawCircles(games) {
+        //console.log(numSales)
+        //console.log(typeof numSales)
+        var circles = svg.selectAll(".Game")
+            .data(games)
+            .enter().append("circle")
+            .attr("class", "Game")
+            .attr("r", function(d) {
+                return radiusScale(d.Global_Sales)
+            })
+            //.attr("fill", "none")
+            .attr("fill", function(d) {
+                switch(d.Genre) {
+                    case "Platform":
+                        return "#FBA4FF"
+                    case "Racing":
+                        return "#8CD9FF"
+                    case "Sports":
+                        return "#FFFE00"
+                    case "Fighting":
+                        return "#FF9900"
+                    case "Shooter":
+                        return "#FF4F4F"
+                    case "Role-Playing":
+                        return "#4FFF54"
+                    case "Strategy":
+                        return "#AC1AFF"
+                    case "Action":
+                        return "#4A81FF"
+                    case "Misc":
+                        return "#FFFFFF"
+                    case "Simulation":
+                        return "#00FFEE"
+                    case "Puzzle":
+                        return "#000000"
+                    case "Adventure":
+                        return "#89550B"
+                }
+            })
+            .attr("stroke", function(d) {
+                switch(d.Genre) {
+                    case "Platform":
+                        return "#FBA4FF"
+                    case "Racing":
+                        return "#8CD9FF"
+                    case "Sports":
+                        return "#FFFE00"
+                    case "Fighting":
+                        return "#FF9900"
+                    case "Shooter":
+                        return "#FF4F4F"
+                    case "Role-Playing":
+                        return "#4FFF54"
+                    case "Strategy":
+                        return "#AC1AFF"
+                    case "Action":
+                        return "#4A81FF"
+                    case "Misc":
+                        return "#FFFFFF"
+                    case "Simulation":
+                        return "#00FFEE"
+                }
+            })
+            .attr("stroke-width", 3)
+            .attr("cx", 100)
+            .attr("cy", 100)
+            .text(function(d) {
+                return d.Name;
+            })
+
+
+        simulation1.nodes(ubisoft)
+            .on("tick", ticked)
+
+        simulation2.nodes(activision)
+            .on("tick", ticked)
+
+        simulation3.nodes(ea)
+            .on("tick", ticked)
+
+        simulation4.nodes(nintendo)
+            .on("tick", ticked)
+
+        simulation5.nodes(bethesda)
+            .on("tick", ticked)
+
+
+        function ticked() {
+            circles
+                .attr("cx", function(d) {
+                    return d.x
+                })
+                .attr("cy", function(d) {
+                    return d.y
+                })
+        }
+
+    }
+
+
+
+
+</script>
+
+<style>
+    html, body {
+        margin: 0;
+        height: 100%;
+    }
+
+    svg {
+        background: #242A41;
+        height: 100%;
+        width: 100%;
+    }
+</style>
+
+
+</html>
